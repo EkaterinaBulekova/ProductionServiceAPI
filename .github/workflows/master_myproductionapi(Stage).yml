@@ -45,7 +45,7 @@ jobs:
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'aw-production-api'
+        app-name: 'myproductionapi'
         slot-name: 'Stage'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_ee2a9d4b2b024b24b8bc9489e9baef9d }}
         package: "./_build"
