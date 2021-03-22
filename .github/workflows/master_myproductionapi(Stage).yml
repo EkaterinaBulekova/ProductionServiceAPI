@@ -1,13 +1,15 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP app to Azure Web App - myproductionapi(Stage)
+name: Build and deploy ASP app to Azure Web App - aw-production-api(Stage)
 
 on:
   push:
     branches:
       - master
   workflow_dispatch:
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
 
 jobs:
   build-and-deploy:
@@ -22,16 +24,28 @@ jobs:
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.5
 
+    - name: Navigate to Workspace
+      run: cd $GITHUB_WORKSPACE
+
+    - name: Create Build Directory
+      run: mkdir _build
+
     - name: Restore NuGet packages
       run: nuget restore
 
-    - name: Publish to folder
-      run: msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="\published\"
+    - name: Build and publish to folder
+      run: msbuild ProductionWebAPI.sln /nologo /nr:false /p:DeployOnBuild=true /p:DeployDefaultTarget=WebPublish /p:WebPublishMethod=FileSystem /p:DeleteExistingFiles=True /p:platform="Any CPU" /p:configuration="Release" /p:PublishUrl="../_build"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: published_webapp
+        path: "./_build"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'myproductionapi'
+        app-name: 'aw-production-api'
         slot-name: 'Stage'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_ee2a9d4b2b024b24b8bc9489e9baef9d }}
-        package: \published\
+        package: "./_build"
